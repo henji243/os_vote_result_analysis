@@ -1,4 +1,4 @@
-# https://scratch.mit.edu/projects/771366875で使った手抜きコード
+# https://scratch.mit.edu/projects/771366875 で使った手抜きコード
 バックアップとかはさすがにアップロードできないので
 ちょっと違うデータが出ますが、そこは気にしないでください。
 ちなみにグラフはmatplotlibだとちょっとダサい感じがしたのでExcelで手直ししました
