@@ -1,3 +1,4 @@
+import os
 import requests
 import json
 import matplotlib.pyplot as plt
@@ -6,25 +7,31 @@ import matplotlib.pyplot as plt
 url = "https://clouddata.scratch.mit.edu/logs?projectid=643164196&limit=999&offset=0"
 res = requests.get(url).json()
 
+
 def extract_data(data):
     KEYS = ["user", "name", "value"]
+    OS_TYPES = ["Windows", "Mac", "ChromeOS", "Linux", "Other"]
     extract_result = dict(filter(lambda dic: dic[0] in KEYS, data.items()))
     os_name = extract_result["name"][2:]
-    if os_name == "Chrome OS":
-        extract_result["name"] = "ChromeOS"
-    elif os_name == "mac":
-        extract_result["name"] = "Mac"
+
+    if os_name.lower().replace(" ", "") in list(map(lambda x: x.lower(), OS_TYPES)):
+        type_index = list(
+            map(lambda x: x.lower(), OS_TYPES)
+        ).index(os_name.lower().replace(" ", ""))
+        extract_result["name"] = OS_TYPES[type_index]
     elif os_name == "その他":
         extract_result["name"] = "Other"
-    else:
-        extract_result["name"] = os_name
     return extract_result
+
 
 latest_vote_count = {"Windows": 0, "Mac": 0, "Linux": 0, "ChromeOS": 0, "Other": 0}
 for i in res:
     j = extract_data(i)
-    if latest_vote_count[j["name"]] == 0:
-        latest_vote_count[j["name"]] = j["value"]
+    try:
+        if latest_vote_count[j["name"]] == 0:
+            latest_vote_count[j["name"]] = j["value"]
+    except KeyError:
+        pass
 
 all_vote_count = sum(latest_vote_count.values())
 
@@ -35,7 +42,12 @@ original_data = {"Windows": 0, "Mac": 0, "Linux": 0, "ChromeOS": 0, "Other": 0}
 extracted_data = original_data.copy()
 
 for i in voter_list:
-    if not (votedata := (i["user"], i["name"])) in voted_person or i["user"] == "henji243":
+    if i["name"] not in original_data.keys():
+        continue
+    if (
+        not (votedata := (i["user"], i["name"])) in voted_person
+        or i["user"] == "henji243"
+    ):
         voted_person.append(votedata)
         extracted_data[votedata[1]] += 1
     original_data[votedata[1]] += 1
@@ -49,7 +61,12 @@ for _ in range(5):
 
 print(latest_vote_count)
 
-plt.pie(latest_vote_count.values(), labels=latest_vote_count.keys(),
-        autopct='%1.2f%%', startangle=90, counterclock=False)
+plt.pie(
+    latest_vote_count.values(),
+    labels=latest_vote_count.keys(),
+    autopct="%1.2f%%",
+    startangle=90,
+    counterclock=False,
+)
 plt.axis("equal")
 plt.show()
