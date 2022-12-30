@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 url = "https://clouddata.scratch.mit.edu/logs?projectid=643164196&limit=999&offset=0"
 res = requests.get(url).json()
 
-
 def extract_data(data):
     KEYS = ["user", "name", "value"]
     OS_TYPES = ["Windows", "Mac", "ChromeOS", "Linux", "Other"]
@@ -23,15 +22,13 @@ def extract_data(data):
         extract_result["name"] = "Other"
     return extract_result
 
-
 latest_vote_count = {"Windows": 0, "Mac": 0, "Linux": 0, "ChromeOS": 0, "Other": 0}
 for i in res:
     j = extract_data(i)
     try:
         if latest_vote_count[j["name"]] == 0:
             latest_vote_count[j["name"]] = j["value"]
-    except KeyError:
-        pass
+    except KeyError: pass
 
 all_vote_count = sum(latest_vote_count.values())
 
@@ -56,7 +53,7 @@ del voted_person  # 一応軽量化の為消しておく
 for _ in range(5):
     i = tuple(original_data.items())
     j = tuple(extracted_data.items())
-    latest_vote_count[i[_][0]] -= i[_][1]
+    latest_vote_count[i[_][0]] -= i[_][1]  # 結果から引く
     latest_vote_count[i[_][0]] += j[_][1]
 
 print(latest_vote_count)
